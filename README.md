@@ -5,11 +5,11 @@ Ugly, unefficient code, which builds a heap of html files, that may be served to
 
 Those sites shall show all channels of a lightning network node.
 With each channel comes a bunch of numbers, which represent:
-  med : the median of fees, all other direct connected nodes charge towards that particular node
-  avg : the average of all fees, others charge towards this node
-  cavg : like avg, but the 20% highest fees are left out of calculation
-  current fee : currently set fee towards this node
-  new fee : the number, that will be used in the copy menu (initalized with average of previous numbers)
+  - med : the median of fees, all other direct connected nodes charge towards that particular node
+  - avg : the average of all fees, others charge towards this node
+  - cavg : like avg, but the 20% highest fees are left out of calculation
+  - current fee : currently set fee towards this node
+  - new fee : the number, that will be used in the copy menu (initalized with average of previous numbers)
 
 copy menu (buggy):
   Copys varios data to clipboard.
