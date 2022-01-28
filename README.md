@@ -1,5 +1,6 @@
 # lnPixi
-Get idea of how to initally price lightning channels
+Get idea of how to initally price lightning channels.
+demo: https://einseins11.de/lnpixi/
 
 Ugly, unefficient code, which builds a heap of html files, that may be served to a browser.
 
