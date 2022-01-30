@@ -1,0 +1,100 @@
+* {
+    box-sizing: border-box;
+  }
+.openBtn {
+  display: flex;
+  justify-content: left;
+}
+.openButton {
+  border: none;
+  border-radius: 1px;
+  background-color: #1c87c9;
+  color: white;
+  padding: 3px 3px;
+  cursor: pointer;
+  position: fixed;
+}
+.copyMenu {
+  position: relative;
+  text-align: center;
+  width: 100%;
+}
+.formPopup {
+  display: none;
+  position: fixed;
+  left: 45%;
+  top: 5%;
+  transform: translate(-50%, 5%);
+  border: 2px solid #afdafd;
+  z-index: 9;
+}
+.formContainer {
+  max-width: 150px;
+  padding: 5px;
+  background-color: #fff;
+}
+.formContainer .btn {
+  padding: 5px 1px;
+  border: none;
+  background-color: #8ebf42;
+  color: #fff;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 1px;
+  opacity: 0.8;
+}
+.formContainer .cancel {
+  background-color: #cc0000;
+}
+.formContainer .btn:hover,
+.openButton:hover {
+  opacity: 1;
+}
+
+
+.itemRow button {
+  background-color: #04AA6D; /* Green background */
+  border: 1px solid green; /* Green border */
+  color: white; /* White text */
+  padding: 2px 5px; /* Some padding */
+  cursor: pointer; /* Pointer/hand icon */
+  /*float: left; /* Float the buttons side by side */
+}
+/* Clear floats (clearfix hack) */
+.itemRow:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+.itemRow button:not(:last-child) {
+  border-right: none; /* Prevent double borders */
+}
+/* Add a background color on hover */
+.itemRow button:hover {
+  background-color: #3e8e41;
+}
+.itemRow input {
+  border: none;
+  align: center;
+  text-align: center;
+  width: 50px;
+}
+.itemRow td {
+  text-align: center;
+}
+.itemRow .feeButton {
+  border-radius: 5px;
+}
+.itemRow .newfee {
+  background-color: AliceBlue;
+}
+
+
+.itemRow {
+  display: inline;
+  white-space: nowrap;
+}
+.alias {
+  display: inline;
+  white-space: nowrap;
+}
