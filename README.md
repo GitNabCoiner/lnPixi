@@ -2,7 +2,7 @@
 Get idea of how to initally price lightning channels.
 demo: https://einseins11.de/lnpixi/
 
-Ugly, unefficient code, which builds a heap of html files, that may be served to a browser.
+Ugly, unefficient and buggy code, which builds a heap of html files, that may be served to a browser.
 
 Those sites shall show all channels of a lightning network node.
 With each channel comes a bunch of numbers, which represent:
@@ -20,10 +20,17 @@ copy menu (buggy):
   chan-id: that channels id
   chan-point: that channels blockchain contact point
   node-pubkey: yes! exactly, what it suggests to be.
-  
-  
-  usage:
+
+
+usage:
   - get a describegraph.json from lnd (currently only tested with lncli's output)
   - run python3 get_remote_inc_fee.py placeholder ./path/to/lnds/describegraph.json
-  - enjoy some nice tea until it is finished
-  - scp -r ./out/* user@awsome.webserv.er:/path/to/srv/www/lnpixi
+  - enjoy something nice, like tea until it is finished
+  - cd out
+  - tar -cvf .
+  - scp out.tar user@awsome.webserv.er:/path/to/srv/www/faye/lightning
+  - scp -r ../static/* user@awsome.webserv.er:/path/to/srv/www/static
+  - untar@http.file.server
+
+How to use produced data?
+One way of Usage: Find the channel, of whose ppm you are in uncertainty. Click one of the numbers, to set it to "new fee" or edit that value manually. Click "copy" to activate copy menu. Select, what you like to have put in your clipboard.
