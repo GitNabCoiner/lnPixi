@@ -2,23 +2,22 @@
 
 #may be used for getting an idea of current feerates for a node
 #based on the fees, others have set
-from sys import argv
-import json, os, time, threading, signal
+import json, os, time, threading, signal, argparse, sys
 
-max_threads=32 #-1 mainthread
 joblist=[]
-exitFlag = False
+exitFlag = False # needed for later implementation of ctrl+c-handler
 
 #worker class to generate html-file-output
 #work shal be a list of nodes pubkey as string
 class htmlGen(threading.Thread):
-   def __init__(self, threadID, name, work):
+   def __init__(self, threadID, name, work, outdir):
       threading.Thread.__init__(self)
       self.threadID = threadID
       self.name = name
       self.work = work
+      self.outdir = outdir
    def run(self):
-      workerWebBuilder(self.work)
+      workerWebBuilder(self.work,self.outdir)
       print("\nWorker "+str(self.threadID)+" finished.")
       return()
 
@@ -52,7 +51,6 @@ def get_avg_fee(node,mynode,capper=[0,0.85]):
     others_fee1=[int(o["node2_policy"]['fee_rate_milli_msat']) for o in edges1]
     others_fee2=[int(o["node1_policy"]['fee_rate_milli_msat']) for o in edges2]
     of=others_fee1+others_fee2
-    #print(len(of))
     if len(of)<2:return(0,0,0,0,["none","none"])
     of.sort()
     median=of[int(len(of)/2)]
@@ -61,7 +59,6 @@ def get_avg_fee(node,mynode,capper=[0,0.85]):
     avgc=sum(shortenfees)/len(shortenfees)
     myfee=[int(e["node1_policy"]['fee_rate_milli_msat']) for e in edges1 + edges2 if e['node1_pub'] == mynode]
     myfee=myfee+[int(e["node2_policy"]['fee_rate_milli_msat']) for e in edges1 + edges2 if e['node2_pub'] == mynode]+[0]
-    #print(myfee)
     #chanid/point
     try:
         cidp=[ [e['channel_id'], e['chan_point']] for e in edges1 + edges2 if e['node2_pub'] == mynode or e['node1_pub'] == mynode ][0]
@@ -111,7 +108,8 @@ def buildHtml(data,orginal='./fees.html',alias='asddsaedccde'):
     return(z)
 
 
-def buildFrontend(nodes=[{"alias":"asddsa","pub_key":"123abc","color":"#3399ff"}],orginal='./frontend.html'):
+def buildFrontend(nodes=[{"alias":"asddsa","pub_key":"123abc","color":"#3399ff"}],orginal='./frontend.html',outfile='out/index.html'):
+    print("building frontend(" + str(len(nodes)) + " entrys) in: " + str(outfile))
     items=[]
     for n in nodes:
         items.append('<a href="'+n["pub_key"]+'/index.html" style="color: '+n['color']+'">'+n["alias"]+' - '+n["pub_key"]+'</a>')
@@ -119,61 +117,109 @@ def buildFrontend(nodes=[{"alias":"asddsa","pub_key":"123abc","color":"#3399ff"}
         t=f.read()
     i=t.find('<!-- hierrein -->')
     site=t[0:i]+"\n".join(items)+t[i:]
+    if outfile != None:
+        with open(outfile,"w") as f:
+            f.write(site)
     return(site)
 
-def workerWebBuilder(nodelist):
+def workerWebBuilder(nodelist,outdir='out'):
     for n,node in enumerate(nodelist):
         alias=resolve_alias(node)
         print("Try generating feereport "+str(n)+" for: "+alias)
         sc=fee_report(node,pr=False)
         print("Exporting feereport towards out/"+node+".html")
         site=buildHtml(sc,alias=alias)
-        newpath = './out/'+node
+        newpath = outdir+'/'+node
         if not os.path.exists(newpath):
             os.makedirs(newpath)
         with open(newpath+"/index.html","w") as f:
             f.write(site)
 
+#spawn workers, that build html
+def startWorkers(joblist,outdir):
+    global max_threads
+    max_chunk=10
+    id=0
+    while len(joblist) > 0:
+        while (threading.activeCount() < max_threads):
+            amount=len(joblist)
+            if amount > max_chunk: amount=max_chunk
+            work=[joblist.pop() for _ in range(0,amount)]
+            if not exitFlag:
+                id+=1
+                worker=htmlGen(id,"Builder_"+str(id),work,outdir)
+                worker.start()
+                print("started worker:"+str(id))
+        if len(joblist) <1:exit()
 
-#makshift argv-checker
-if len(argv)!=3:
-    print('Usage: python3 lnfee.py ./path/to/nodes.json ./path/to/lnds/describegraph.json')
-    print(argv)
-    exit(1)
-#graph=json.load(open("jsons/describegraph.json","rb"))
-#please add some error-handling/avoiding
-print("Try loading graph...")
-graph=json.load(open(argv[2],"rb"))
-print("Generating nodelist")
-#nodelist with all nodes, seen within one week
+
+####parameter handling and logic on what to do
+p = argparse.ArgumentParser()
+paras=[["--node","The target nodes pubkey",""],
+    ["--dgjson","path to describegraph.json default:./describegraph.json","./describegraph.json"],
+    ["--nodesjson","path to jsonfile, containing list of target nodes",""],
+    ["--outdir","folder in which html-structure will be created defaults to ./out","./out"],
+    ["--numthreads","number of threads to utilyze. defaults to 16",16]]
+for para in paras:
+    p.add_argument(para[0], type=type(para[2]), default=para[2], help=para[1])
+
+args = p.parse_args()
+dgjson = args.dgjson
+centernode_key=args.node #cosy bane
+max_threads=args.numthreads
+outdir=args.outdir
+nodesjson=args.nodesjson
+nodelist=None
+if os.path.isfile(nodesjson):
+    with open(nodesjson,"r") as f:
+        nodelist=json.load(f)
+    print("Loaded something, assumed to be a list of node pubkeys.")
+
+if not os.path.exists(outdir):os.makedirs(outdir)
+
+if os.path.isfile(dgjson):
+    with open(dgjson,"r") as f:
+        try:
+             graph=json.load(f)
+        except:
+            print("failed loading dgjson. exiting")
+            sys.exit(2)
+        print("dg.json was loaded. I spare geometry checks for now.")
+else:
+    print(dgjson + " not found. Looking in stdin:")
+    si=sys.stdin
+    if not si.isatty():
+        l=(si.read())
+    try:
+        graph=json.loads(l)
+    except:
+        print("failed loading dgjson from stdin")
+        sys.exit(2)
+    print("loded something from stdin. I spare geometry checks for now. Lets assume, its a well formed describegraph.json.")
+
+print("hey, we may have a graph")
+
+if len(centernode_key) > 10:
+    print("generating one set of pages for node:"+centernode_key+"\nin:"+outdir)
+    nl=[{"color":n['color'],"alias":n['alias'],"pub_key":n['pub_key']} for n in graph['nodes'] if n["pub_key"]==centernode_key]
+    buildFrontend(nodes=nl,outfile=outdir+"/index.html")
+    joblist=[n["pub_key"] for n in nl]
+    workerWebBuilder([centernode_key],outdir)
+    sys.exit(0)
+
+if nodelist !=None:
+    print("Spawning Workers to generate "+str(len(nodelist))+" sets of websites.")
+    nl=[]
+    for node in nodelist:
+        nl.append([{"color":n['color'],"alias":n['alias'],"pub_key":n['pub_key']} for n in graph['nodes'] if n["pub_key"]==node].pop())
+    buildFrontend(nodes=nl,outfile=outdir+"/index.html")
+    joblist=[n["pub_key"] for n in nl]
+    startWorkers(joblist,outdir)
+    sys.exit(0)
+
+print("no node or nodelist found. Generating for all nodes, seen within 1 week.")
 nl=[{"color":n['color'],"alias":n['alias'],"pub_key":n['pub_key']} for n in graph['nodes'] if time.time()-n["last_update"]<604800]
-#print("Generating index.html")
-fe=buildFrontend(nodes=nl)
-with open("out/index.html","w") as f:
-    f.write(fe)
-
-#starting workers
-#print("Try loading list of targetnodes...")
+buildFrontend(nodes=nl,outfile=outdir+"/index.html")
 joblist=[n["pub_key"] for n in nl]
-#10 is the maximal amount of nodes, one worker inspects
-max_chunk=10
-id=0
-while len(joblist) > 0:
-    while (threading.activeCount() < max_threads):
-        amount=len(joblist)
-        if amount > max_chunk: amount=max_chunk
-        work=[joblist.pop() for _ in range(0,amount)]
-        if not exitFlag:
-            id+=1
-            worker=htmlGen(id,"Builder_"+str(id),work)
-            #worker.run()
-            worker.start()
-            print("started worker:"+str(id))
-            #print("latest event:"+str(eventlist[-1]))
-    if len(joblist) <1:exit()
-
-
-
-    #with open(node+'.json','w') as outfile:
-        #json.dump(sc, outfile)
-    #print(len(sc))
+print("not starting workers")
+#startWorkers(joblist,outdir)
