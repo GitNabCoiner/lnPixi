@@ -159,6 +159,8 @@ paras=[["--node","The target nodes pubkey",""],
     ["--dgjson","path to describegraph.json default:./describegraph.json","./describegraph.json"],
     ["--nodesjson","path to jsonfile, containing list of target nodes",""],
     ["--outdir","folder in which html-structure will be created defaults to ./out","./out"],
+    ["--doit","allow generating all. Defaults to False",False],
+    ["--vf","verbosity filter. Defaults to 1 for say enough. (above 3 is silent) --unfunc--",0],
     ["--numthreads","number of threads to utilyze. defaults to 16",16]]
 for para in paras:
     p.add_argument(para[0], type=type(para[2]), default=para[2], help=para[1])
@@ -169,6 +171,7 @@ centernode_key=args.node #cosy bane
 max_threads=args.numthreads
 outdir=args.outdir
 nodesjson=args.nodesjson
+doit=args.doit
 nodelist=None
 if os.path.isfile(nodesjson):
     with open(nodesjson,"r") as f:
@@ -217,9 +220,11 @@ if nodelist !=None:
     startWorkers(joblist,outdir)
     sys.exit(0)
 
-print("no node or nodelist found. Generating for all nodes, seen within 1 week.")
+print("no node nor nodelist found. Generating for all nodes, seen within 1 week.")
 nl=[{"color":n['color'],"alias":n['alias'],"pub_key":n['pub_key']} for n in graph['nodes'] if time.time()-n["last_update"]<604800]
 buildFrontend(nodes=nl,outfile=outdir+"/index.html")
 joblist=[n["pub_key"] for n in nl]
-print("not starting workers")
-#startWorkers(joblist,outdir)
+if not doit:
+    print("not starting workers")
+    sys.exit(0)
+startWorkers(joblist,outdir)
