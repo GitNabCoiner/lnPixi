@@ -46,7 +46,8 @@ def aliasTable(n=None,u=False):
     global name_table, graph
     if u:
         name_table.clear()
-        name_table.update([{n['pub_key']:n['alias']} for n in graph['nodes'] if n['pub_key'] not in name_table].pop())
+        for i in [{no['pub_key']:no['alias']} for no in graph['nodes'] if not(no['pub_key'] in name_table)]:
+            name_table.update(i)
     if n != None:
       try:
         alias=name_table[n]
@@ -184,6 +185,7 @@ paras=[["--node","The target nodes pubkey",""],
     ["--outdir","folder in which html-structure will be created defaults to ./out","./out"],
     ["--doit","allow generating all. Defaults to False",False],
     ["--vf","verbosity filter. Defaults to 1 for say enough. (below 1 is silent)",1],
+    ["--test","test mode Defaults to 0 for not testing.",0],
     ["--numthreads","number of threads to utilyze. defaults to 16",16]]
 for para in paras:
     p.add_argument(para[0], type=type(para[2]), default=para[2], help=para[1])
@@ -225,6 +227,16 @@ else:
     if vf > 0: print("loded something from stdin. I spare geometry checks for now. Lets assume, its a well formed describegraph.json.")
 
 if vf > 0: print("hey, we may have a graph variable")
+
+#put code in here to test it
+if args.test == 1:
+    print("test stuff and exit")
+    print(len(name_table))
+    print(name_table)
+    sys.exit()
+
+if vf > 0: print("Generating node name table")
+aliasTable(n=None,u=True)
 
 if len(centernode_key) > 10:
     if vf > 1: print("generating one set of pages for node:"+centernode_key+"\nin:"+outdir)
