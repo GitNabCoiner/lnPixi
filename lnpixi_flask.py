@@ -6,10 +6,11 @@ nlfey=[] #nodelist for lnpixi
 @app.route('/lnpixi', methods=['GET'])
 def faye():
     #pg-variables
-    amount=10 #amount of node keys to pull
-    delete=False #delete pulled nodes from list
-    addNode='nodes pubkey' #pubkey of the node to be added to refreshlist
-    outlist=[] #list of nodes to send to requester
+    print(request.args.get('amount'))
+    amount=request.args.get('amount') if request.args.get('amount') != None else 0 #amount of node keys to pull
+    delete=request.args.get('delete') if request.args.get('delete') != None else False #delete pulled nodes from list
+    addNode=request.args.get('addNode') if request.args.get('addNode') != None else 'nodes pubkey' #pubkey of the node to be added to refreshlist
+    outlist=request.args.get('outlist') if request.args.get('outlist') != None else [] #list of nodes to send to requester
     global nlfey #nodelist for lnpixi
     #addNode present! try to add it to list and exit
     if addNode == checkPubkey(addNode):
