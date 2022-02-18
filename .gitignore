@@ -4,3 +4,4 @@ test/
 jsons/
 nodes.json
 *.json
+*.pyc
