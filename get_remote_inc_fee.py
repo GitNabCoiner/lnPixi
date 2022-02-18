@@ -122,10 +122,10 @@ def runoldway():
     fee_report(centernode_key,pr=True)
 
 #build this htmlpage
-def buildHtml(data,orginal='./fees.html',alias='asddsaedccde'):
+def buildHtml(data,orginal='./fees.html',alias='asddsaedccde',pubkey="1234567890abcdef"):
     with open(orginal,"r") as org:
         t=org.read()
-        z=t[0:t.find('[{"al')]+json.dumps(data)+";\nvar alias='"+alias+"';"+t[t.find('edccde";')+8:]
+        z=t[0:t.find('[{"al')]+json.dumps(data)+":\nvar pubkey = '"+pubkey+"'"+";\nvar alias='"+alias+"';"+t[t.find('edccde";')+8:]
     return(z)
 
 
@@ -152,7 +152,7 @@ def workerWebBuilder(nodelist,outdir='out'):
         sc=fee_report(node,pr=pr)
         if sc != []:
             if vf > 1: print("Exporting feereport towards out/"+node+".html")
-            site=buildHtml(sc,alias=alias)
+            site=buildHtml(sc,alias=alias,pubkey=node)
             newpath = outdir+'/'+node
             if not os.path.exists(newpath):
                 os.makedirs(newpath)

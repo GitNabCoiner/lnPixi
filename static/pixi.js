@@ -24,10 +24,12 @@ function setFee(fee,i){
   document.getElementById('newfee'+i).value=Math.round(fee);
 }
 
-function buildContent(inner,alias){
-
+function buildContent(inner,alias,pubkey){
+console.log(pubkey);
 start='<h2>Fee suggestions for Node:'+alias+'</h2>'+
-      '<p>Click on the copy button to open the copy menu.</p><table class="itemRow">'+
+      '<p>Click on the copy button to open the copy menu.</p><a href="https://flask.einseins11.de/'+
+      'lnpixi?addNode='+pubkey+'">Update Data</a>'+
+      '<table class="itemRow">'+
       '<tr><th>Med</th><th>Avg</th><th>cAvg</th><th>Peers Alias</th><th>Current Fee</th><th>New Fee</th><th></th></tr>';
 //alert(typeof(inner));
 //console.log(inner);

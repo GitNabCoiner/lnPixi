@@ -13,14 +13,15 @@
       let suggestionCluster = [];
       function main(){
         suggestionCluster = [{"alias": "TURGIDSON-PLEBNET", "pubkey": "0381de1709efbda38f9afd2d47399caa19a2630c0c795acd24755efa442685fc7d", "median": 1, "avg": 96.21, "cappedAvg": 9.62, "curFee": 30, "chanID": "773593291695587328", "chanPoint": "9eaf41c6071601795f0d2e2d418a7dd2f7d4f5b477cd9df565271b76faec0906:0"}, {"alias": "GirthMavic", "pubkey": "035f42b1c1cd8afe605f3fc1befc270844ec9885b7c53f713faa672869c25cb148", "median": 1, "avg": 33.57, "cappedAvg": 5.79, "curFee": 25, "chanID": "773593291695652864", "chanPoint": "64d0edfabf4c02830b7d84ce45e5e3a1ba2af88b3a8c4fd16efdffbd9748f005:0"}, {"alias": "WalletOfSatoshi.com", "pubkey": "035e4ff418fc8b5554c5d9eea66396c227bd429a3251c8cbc711002ba215bfc226", "median": 50, "avg": 281.53, "cappedAvg": 83.74, "curFee": 60, "chanID": "774366248322662400", "chanPoint": "4e10670e1326dc6df853fa12abb65e0ee829a0953d3637c7fbe92241545195c8:0"}];
+        var pubkey = "03c11d60b92ab00687b6cfcbaf7e34341e5640149db7d753f2155edf198c481620";
         var alias = "asddsaedccde";
         //console.log(suggestionCluster);
         var rows = suggestionCluster.reduce(buildInner);
         //console.log(rows.slice(15));
-        var c = buildContent(rows.slice(15),alias);
+        var c = buildContent(rows.slice(15),alias,pubkey);
         document.getElementById('hierrein').innerHTML=c;
       }
     </script>
-    <script src="../../static/pixi.js"></script>
+    <script src="static/pixi.js"></script>
     </footer>
 </html>
