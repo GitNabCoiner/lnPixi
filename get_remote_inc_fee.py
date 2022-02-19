@@ -210,8 +210,8 @@ if os.path.isfile(dgjson):
     with open(dgjson,"r") as f:
         try:
              graph=json.load(f)
-        except:
-            if vf > 0: print("failed loading dgjson. exiting")
+        except Exception as e:
+            if vf > 0: print("failed loading dgjson. exiting \n",e)
             sys.exit(2)
         if vf > 0: print("dg.json was loaded. I spare geometry checks for now.")
 else:
