@@ -19,7 +19,7 @@ def faye():
         else:
             return('Something went wrong. Node may already be in work-que or its pub_key appears malformed' )
     #no new key in GET, so return some json and exit
-    if delete:
+    if delete==True:
         for i in range(amount):
             try:
                 outlist.append(nlfey.pop())
@@ -30,7 +30,7 @@ def faye():
         outlist=nlfey[amount*-1:]
         return(json.dumps(outlist))
 
-    return "<h1>Hællo, brave neue World</h1><br>Try it with something from lnpixi?amount=10&addNode=pubkey&delete=False"
+    return "<h1>I did not understand.</h1><br>Try it with something from lnpixi?amount=10&addNode=pubkey&delete=False"
 
 #check if data looks like a pub_key
 def checkPubkey(data):

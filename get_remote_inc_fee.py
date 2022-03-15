@@ -2,7 +2,7 @@
 
 #may be used for getting an idea of current feerates for a node
 #based on the fees, others have set
-import json, os, time, threading, signal, argparse, sys
+import json, os, time, threading, signal, argparse, sys, requests
 
 joblist=[]
 exitFlag = False # needed for later implementation of ctrl+c-handler
@@ -125,7 +125,7 @@ def runoldway():
 def buildHtml(data,orginal='./fees.html',alias='asddsaedccde',pubkey="1234567890abcdef"):
     with open(orginal,"r") as org:
         t=org.read()
-        z=t[0:t.find('[{"al')]+json.dumps(data)+":\nvar pubkey = '"+pubkey+"'"+";\nvar alias='"+alias+"';"+t[t.find('edccde";')+8:]
+        z=t[0:t.find('[{"al')]+json.dumps(data)+";\nvar pubkey = '"+pubkey+"'"+";\nvar alias='"+alias+"';"+t[t.find('edccde";')+8:]
     return(z)
 
 
@@ -182,10 +182,12 @@ p = argparse.ArgumentParser()
 paras=[["--node","The target nodes pubkey",""],
     ["--dgjson","path to describegraph.json default:./describegraph.json","./describegraph.json"],
     ["--nodesjson","path to jsonfile, containing list of target nodes",""],
+    ["--nodeshttp","address of website containing list of target nodes",""],
     ["--outdir","folder in which html-structure will be created defaults to ./out","./out"],
     ["--doit","allow generating all. Defaults to False",False],
     ["--vf","verbosity filter. Defaults to 1 for say enough. (below 1 is silent)",1],
     ["--test","test mode Defaults to 0 for not testing.",0],
+    ["--watch","watch dgjson for updates. Defaults to False",False],
     ["--numthreads","number of threads to utilyze. defaults to 16",16]]
 for para in paras:
     p.add_argument(para[0], type=type(para[2]), default=para[2], help=para[1])
@@ -196,6 +198,7 @@ centernode_key=args.node #cosy bane
 max_threads=args.numthreads
 outdir=args.outdir
 nodesjson=args.nodesjson
+nodeshttp=args.nodeshttp
 doit=args.doit
 vf=args.vf
 nodelist=None
@@ -211,7 +214,7 @@ if os.path.isfile(dgjson):
         try:
              graph=json.load(f)
         except Exception as e:
-            if vf > 0: print("failed loading dgjson. exiting \n",e)
+            if vf > 0: print("failed loading dgjson, exiting:\n",e)
             sys.exit(2)
         if vf > 0: print("dg.json was loaded. I spare geometry checks for now.")
 else:
